@@ -2,10 +2,49 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:semillas_app/core/router/router.dart';
+import 'package:semillas_app/core/database/database_helper.dart';
 import '../layouts/base_layout.dart';
 
-class VillageScreen extends StatelessWidget {
+class VillageScreen extends StatefulWidget {
   const VillageScreen({super.key});
+
+  @override
+  State<VillageScreen> createState() => _VillageScreenState();
+}
+
+class _VillageScreenState extends State<VillageScreen> {
+  String _liderNombre = 'Cargando...';
+  String _liderAldea = 'Cargando...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLiderData();
+  }
+
+  Future<void> _loadLiderData() async {
+    try {
+      final lider = await DatabaseHelper.instance.verificarLiderExistente();
+      if (lider != null && mounted) {
+        setState(() {
+          _liderNombre = lider['nombre'] as String;
+          _liderAldea = lider['aldea'] as String;
+        });
+      } else if (mounted) {
+        setState(() {
+          _liderNombre = 'Inés';
+          _liderAldea = 'Semillas';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _liderNombre = 'Error';
+          _liderAldea = 'Error';
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,21 +101,21 @@ class VillageScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Líder: Inés',
-                        style: TextStyle(
+                        'Líder: $_liderNombre',
+                        style: const TextStyle(
                           color: Color(0xFFFFC107),
                           fontWeight: FontWeight.w900,
                           fontSize: 16,
                         ),
                       ),
                       Text(
-                        'Aldea: Semillas',
-                        style: TextStyle(
+                        'Aldea: $_liderAldea',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,

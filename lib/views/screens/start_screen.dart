@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:semillas_app/core/router/router.dart';
+import 'package:semillas_app/core/database/database_helper.dart';
 import '../layouts/base_layout.dart';
 import 'village_screen.dart';
 
@@ -14,12 +15,33 @@ class StartScreen extends StatefulWidget {
 
 class _StartScreenState extends State<StartScreen> {
   late AudioPlayer _audioPlayer;
+  Map<String, dynamic>? _lider;
+  bool _hasCheckedLider = false;
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
     _playBackgroundMusic();
+    _checkLider();
+  }
+
+  Future<void> _checkLider() async {
+    try {
+      final lider = await DatabaseHelper.instance.verificarLiderExistente();
+      if (mounted) {
+        setState(() {
+          _lider = lider;
+          _hasCheckedLider = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _hasCheckedLider = true;
+        });
+      }
+    }
   }
 
   void _playBackgroundMusic() async {
@@ -34,8 +56,170 @@ class _StartScreenState extends State<StartScreen> {
   }
 
   void _startGame() {
-    _audioPlayer.stop();
-    context.go(AppRoutes.village); // Navega a la pantalla del pueblo
+    if (_lider == null) {
+      _showRegisterDialog();
+    } else {
+      _audioPlayer.stop();
+      context.go(AppRoutes.village); // Navega a la pantalla del pueblo
+    }
+  }
+
+  void _showRegisterDialog() {
+    final nameController = TextEditingController();
+    final villageController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Obliga al usuario a registrarse o cancelar
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 16,
+          backgroundColor: const Color.fromARGB(255, 0, 105, 39), // Verde Selva
+          child: Container(
+            padding: const EdgeInsets.all(25),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFFFC107), width: 4), // Borde Dorado
+            ),
+            width: 400,
+            child: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'REGISTRAR LÍDER',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFFFFC107),
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    const Text(
+                      'Ingresa tus datos para comenzar tu aventura en el Amazonas',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Campo de Nombre
+                    TextFormField(
+                      controller: nameController,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      decoration: InputDecoration(
+                        labelText: 'Nombre del Líder',
+                        labelStyle: const TextStyle(color: Color(0xFFFFC107)),
+                        hintText: 'Ej. Inés',
+                        hintStyle: const TextStyle(color: Colors.white38),
+                        prefixIcon: const Icon(Icons.person, color: Color(0xFFFFC107)),
+                        filled: true,
+                        fillColor: Colors.black26,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Colors.white54),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Color(0xFFFFC107), width: 2),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Por favor ingresa un nombre';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 15),
+                    // Campo de Aldea
+                    TextFormField(
+                      controller: villageController,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      decoration: InputDecoration(
+                        labelText: 'Nombre de la Aldea',
+                        labelStyle: const TextStyle(color: Color(0xFFFFC107)),
+                        hintText: 'Ej. Semillas',
+                        hintStyle: const TextStyle(color: Colors.white38),
+                        prefixIcon: const Icon(Icons.home, color: Color(0xFFFFC107)),
+                        filled: true,
+                        fillColor: Colors.black26,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Colors.white54),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Color(0xFFFFC107), width: 2),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Por favor ingresa una aldea';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text(
+                            'Cancelar',
+                            style: TextStyle(color: Colors.white70, fontSize: 16),
+                          ),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF8F00), // Naranja vibrante
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: const BorderSide(color: Colors.white, width: 2),
+                            ),
+                            elevation: 5,
+                          ),
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              final name = nameController.text.trim();
+                              final village = villageController.text.trim();
+                              
+                              await DatabaseHelper.instance.crearNuevoLider(name, village);
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                                _audioPlayer.stop();
+                                context.go(AppRoutes.village);
+                              }
+                            }
+                          },
+                          child: const Text(
+                            'Comenzar',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -106,10 +290,14 @@ class _StartScreenState extends State<StartScreen> {
                   ),
                 ],
               ),
-              child: const Text(
-                '¡Bienvenido a la cosecha!',
+              child: Text(
+                !_hasCheckedLider
+                    ? 'Cargando aventura...'
+                    : _lider != null
+                        ? '¡Bienvenido, Líder ${_lider!['nombre']}!'
+                        : '¡Bienvenido a la cosecha!',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
