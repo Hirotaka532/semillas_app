@@ -1,16 +1,50 @@
+// village_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:semillas_app/core/router/router.dart';
+import 'package:semillas_app/core/database/database_helper.dart';
 import '../layouts/base_layout.dart';
 
-class VillageScreen extends StatelessWidget {
-  final String leaderName;
-  final String villageName;
+class VillageScreen extends StatefulWidget {
+  const VillageScreen({super.key});
 
-  const VillageScreen({
-    super.key, 
-    required this.leaderName, 
-    required this.villageName
-  });
+  @override
+  State<VillageScreen> createState() => _VillageScreenState();
+}
+
+class _VillageScreenState extends State<VillageScreen> {
+  String _liderNombre = 'Cargando...';
+  String _liderAldea = 'Cargando...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLiderData();
+  }
+
+  Future<void> _loadLiderData() async {
+    try {
+      final lider = await DatabaseHelper.instance.verificarLiderExistente();
+      if (lider != null && mounted) {
+        setState(() {
+          _liderNombre = lider['nombre'] as String;
+          _liderAldea = lider['aldea'] as String;
+        });
+      } else if (mounted) {
+        setState(() {
+          _liderNombre = 'Inés';
+          _liderAldea = 'Semillas';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _liderNombre = 'Error';
+          _liderAldea = 'Error';
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +88,20 @@ class VillageScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Líder: $leaderName', 
-                        style: const TextStyle(color: Color(0xFFFFC107), fontWeight: FontWeight.w900, fontSize: 16),
+                        'Líder: $_liderNombre',
+                        style: const TextStyle(
+                          color: Color(0xFFFFC107),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
                       ),
                       Text(
-                        'Aldea: $villageName', 
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        'Aldea: $_liderAldea',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
@@ -74,10 +116,30 @@ class VillageScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _navBtn(context, Icons.rowing, const Color(0xFF0288D1), '/curiara'),
-                _navBtn(context, Icons.person_2_sharp, const Color(0xFFD84315), '/grandfather'),
-                _navBtn(context, Icons.menu_book, const Color(0xFF388E3C), '/ebook'),
-                _navBtn(context, Icons.workspace_premium, const Color(0xFFFF8F00), ''), // Sin ruta aún
+                _buildNavButton(
+                  context,
+                  icon: Icons.rowing,
+                  color: const Color(0xFF0288D1),
+                  onTap: () => context.go(AppRoutes.curiaraTravel),
+                ),
+                _buildNavButton(
+                  context,
+                  icon: Icons.person_2_sharp,
+                  color: const Color(0xFFD84315),
+                  onTap: () => context.go(AppRoutes.grandfather),
+                ),
+                _buildNavButton(
+                  context,
+                  icon: Icons.menu_book,
+                  color: const Color(0xFF388E3C),
+                  onTap: () => context.go(AppRoutes.ebook),
+                ),
+                _buildNavButton(
+                  context,
+                  icon: Icons.workspace_premium,
+                  color: const Color(0xFFFF8F00),
+                  onTap: () {},
+                ),
               ],
             ),
           ),

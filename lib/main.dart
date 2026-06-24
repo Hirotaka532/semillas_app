@@ -1,6 +1,7 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'core/app_router.dart';
+import 'package:semillas_app/core/router/router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      routerConfig: appRouter,
+      routerConfig: AppRoutes.router,
     );
   }
 }
