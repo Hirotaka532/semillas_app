@@ -52,23 +52,18 @@ class _VillageScreenState extends State<VillageScreen> {
       backgroundPath: 'assets/images/Conuco_bg.webp',
       child: Stack(
         children: [
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: const Text(
-                'Equipo: Aquí va la cuadrícula de siembra',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+          // Btn Home
+          Positioned(
+            bottom: 20,
+            left: 20,
+            child: FloatingActionButton(
+              backgroundColor: const Color(0xFFD84315),
+              onPressed: () => context.go('/'),
+              child: const Icon(Icons.home_rounded, color: Colors.white, size: 30),
             ),
           ),
+
+          // PANEL DE INFO DEL USUARIO
           Positioned(
             top: 20,
             left: 20,
@@ -78,27 +73,14 @@ class _VillageScreenState extends State<VillageScreen> {
                 color: const Color(0xFF00695C),
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(color: const Color(0xFFFFC107), width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black,
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: const [BoxShadow(color: Colors.black, blurRadius: 8, offset: Offset(0, 4))],
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Color(0xFF00695C),
-                      size: 28,
-                    ),
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    child: const Icon(Icons.person, color: Color(0xFF00695C), size: 28),
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -127,10 +109,10 @@ class _VillageScreenState extends State<VillageScreen> {
               ),
             ),
           ),
+          
+          // Btns de navegacion
           Positioned(
-            top: 20,
-            right: 20,
-            bottom: 20,
+            top: 20, right: 20, bottom: 20,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -166,28 +148,18 @@ class _VillageScreenState extends State<VillageScreen> {
     );
   }
 
-  Widget _buildNavButton(
-    BuildContext context, {
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _navBtn(BuildContext context, IconData icon, Color color, String route) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        if (route.isNotEmpty) context.push(route);
+      },
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color,
+          color: color, 
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white, width: 3),
-          boxShadow: [
-            const BoxShadow(color: Colors.black54, offset: Offset(0, 5)),
-            BoxShadow(
-              color: Colors.black,
-              blurRadius: 8,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          boxShadow: const [BoxShadow(color: Colors.black54, offset: Offset(0, 5))],
         ),
         child: Icon(icon, color: Colors.white, size: 36),
       ),

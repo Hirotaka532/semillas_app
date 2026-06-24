@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:semillas_app/core/router/router.dart';
 import 'package:semillas_app/core/database/database_helper.dart';
 import '../layouts/base_layout.dart';
-import 'village_screen.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
@@ -13,7 +12,7 @@ class StartScreen extends StatefulWidget {
   State<StartScreen> createState() => _StartScreenState();
 }
 
-class _StartScreenState extends State<StartScreen> {
+class _StartScreenState extends State<StartScreen> with WidgetsBindingObserver {
   late AudioPlayer _audioPlayer;
   Map<String, dynamic>? _lider;
   bool _hasCheckedLider = false;
@@ -21,6 +20,7 @@ class _StartScreenState extends State<StartScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _audioPlayer = AudioPlayer();
     _playBackgroundMusic();
     _checkLider();
@@ -44,6 +44,16 @@ class _StartScreenState extends State<StartScreen> {
     }
   }
 
+  // Control de audio
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _audioPlayer.pause();
+    } else if (state == AppLifecycleState.resumed) {
+      _audioPlayer.resume();
+    }
+  }
+
   void _playBackgroundMusic() async {
     await _audioPlayer.setReleaseMode(ReleaseMode.loop);
     await _audioPlayer.play(AssetSource('audio/GameMusic.ogg'));
@@ -51,11 +61,14 @@ class _StartScreenState extends State<StartScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _audioPlayer.dispose();
     super.dispose();
   }
 
   void _startGame() {
+    _audioPlayer.stop();
+    context.go('/creation');
     if (_lider == null) {
       _showRegisterDialog();
     } else {
@@ -305,71 +318,105 @@ class _StartScreenState extends State<StartScreen> {
                 ),
               ),
             ),
-            const Spacer(flex: 2),
-            GestureDetector(
-              onTap: _startGame,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 35,
-                  vertical: 15,
-                ),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFCA28), Color(0xFFFF8F00)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius: BorderRadius.circular(50),
-                  border: Border.all(color: Colors.white, width: 3),
-                  boxShadow: [
-                    const BoxShadow(
-                      color: Color(0xFFB15300),
-                      offset: Offset(0, 8),
-                    ),
-                    BoxShadow(
-                      color: Colors.black,
-                      blurRadius: 10,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.play_arrow_rounded,
-                        color: Color(0xFFFF8F00),
-                        size: 32,
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    const Text(
-                      'EMPEZAR',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 2.0,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 2.0,
-                            color: Colors.black26,
-                            offset: Offset(1.0, 2.0),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogo() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF00695B),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFFFC107), width: 5),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black45, 
+            blurRadius: 15, 
+            offset: Offset(0, 10)
+          )
+        ],
+      ),
+      child: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'SEMILLAS DE', 
+            style: TextStyle(
+              fontSize: 22, 
+              fontWeight: FontWeight.w900, 
+              color: Color(0xFFFFC107), 
+              letterSpacing: 4
+            )
+          ),
+          Text(
+            'IDENTIDAD', 
+            style: TextStyle(
+              fontSize: 45, 
+              fontWeight: FontWeight.w900, 
+              color: Colors.white, 
+              letterSpacing: 2
+            )
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWelcomeBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFAA00),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+      child: const Text(
+        '¡Bienvenido a la cosecha!', 
+        style: TextStyle(
+          fontSize: 18, 
+          fontWeight: FontWeight.bold, 
+          color: Colors.white
+        )
+      ),
+    );
+  }
+
+  Widget _buildStartButton() {
+    return GestureDetector(
+      onTap: _startGame,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFCA28), Color(0xFFFF8F00)], 
+            begin: Alignment.topCenter, 
+            end: Alignment.bottomCenter
+          ),
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(color: Colors.white, width: 3),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFFB15300), 
+              offset: Offset(0, 6)
+            )
+          ],
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.play_arrow_rounded, color: Colors.white, size: 35),
+            SizedBox(width: 10),
+            Text(
+              'EMPEZAR', 
+              style: TextStyle(
+                fontSize: 26, 
+                fontWeight: FontWeight.w900, 
+                color: Colors.white
+              )
             ),
-            const Spacer(flex: 1),
           ],
         ),
       ),

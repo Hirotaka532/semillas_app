@@ -12,15 +12,18 @@ class BaseLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(backgroundPath, fit: BoxFit.cover),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(backgroundPath, fit: BoxFit.cover),
+        ),
+        Positioned.fill(
+          child: Material(
+            color: Colors.transparent,
+            child: child,
           ),
-          Positioned.fill(child: SafeArea(child: child)),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -6,6 +6,15 @@ import 'package:semillas_app/core/router/router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Modo Inmersivo Total
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  
+  // Forzar transparencia
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor: Colors.transparent,
+  ));
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeRight,
     DeviceOrientation.landscapeLeft,
