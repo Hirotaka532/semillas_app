@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:semillas_app/core/router/router.dart';
 import 'package:semillas_app/core/database/database_helper.dart';
 import '../layouts/base_layout.dart';
+import '../../widgets/conuco_interactivo.dart'; 
 
 class VillageScreen extends StatefulWidget {
   final String leaderName;
@@ -39,7 +40,6 @@ class _VillageScreenState extends State<VillageScreen> {
           _liderAldea = lider['aldea'] as String;
         });
       } else {
-        // Fallback por defecto si no hay base de datos
         setState(() {
           _liderNombre = widget.leaderName;
           _liderAldea = widget.villageName;
@@ -60,7 +60,9 @@ class _VillageScreenState extends State<VillageScreen> {
       backgroundPath: 'assets/images/Conuco_bg.webp',
       child: Stack(
         children: [
-          // Botón Home
+
+          const ConucoInteractivo(),
+
           Positioned(
             bottom: 20,
             left: 20,
@@ -75,10 +77,8 @@ class _VillageScreenState extends State<VillageScreen> {
             ),
           ),
 
-          // Panel de Información
           Positioned(top: 20, left: 20, child: _buildUserPanel()),
 
-          // Botones de Navegación
           Positioned(
             top: 20,
             right: 20,
@@ -109,7 +109,7 @@ class _VillageScreenState extends State<VillageScreen> {
                   Icons.workspace_premium,
                   const Color(0xFFFF8F00),
                   '',
-                ), // Sin ruta
+                ), 
               ],
             ),
           ),

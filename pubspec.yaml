@@ -64,6 +64,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/sprites/
     - assets/audio/
     - assets/data/cuentos_nivel1.json
 
