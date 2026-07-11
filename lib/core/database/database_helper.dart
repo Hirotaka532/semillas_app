@@ -36,6 +36,8 @@ class DatabaseHelper {
         id_cuento INTEGER,
         nivel INTEGER,
         PRIMARY KEY (id_cuento, nivel)
+      CREATE TABLE descubiertos (
+        id INTEGER PRIMARY KEY
       )
     ''');
   }
@@ -78,5 +80,16 @@ class DatabaseHelper {
     );
     
     return List.generate(maps.length, (i) => maps[i]['id_cuento'] as int);
+  Future<List<int>> getDescubiertos() async {
+    final db = await instance.database;
+    final res = await db.query('descubiertos');
+    return res.map((row) => row['id'] as int).toList();
+  }
+
+  Future<void> descubrirElemento(int id) async {
+    final db = await instance.database;
+    await db.insert('descubiertos', {
+      'id': id,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 }

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Moriche Palm",
+    "imagePath": "assets/images/moriche.png",
+    "type": "planta"
+  },
+  {
+    "id": 2,
+    "name": "Victoria Amazónica",
+    "imagePath": "assets/images/victoria_amazonica.png",
+    "type": "planta"
+  },
+  {
+    "id": 3,
+    "name": "Guacamaya",
+    "imagePath": "assets/images/guacamaya.png",
+    "type": "animal"
+  },
+  {
+    "id": 4,
+    "name": "Danta",
+    "imagePath": "assets/images/danta.png",
+    "type": "animal"
+  },
+  {
+    "id": 5,
+    "name": "Agua Dulce",
+    "imagePath": "assets/images/Home_bg.webp",
+    "type": "agua"
+  }
+]

@@ -75,14 +75,14 @@ class _StartScreenState extends State<StartScreen> with WidgetsBindingObserver {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // TÍTULO
+
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 40,
                   vertical: 25,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF006927),
+                  color: const Color(0xFF00695C),
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(color: const Color(0xFFFFC107), width: 5),
                   boxShadow: const [
@@ -144,7 +144,6 @@ class _StartScreenState extends State<StartScreen> with WidgetsBindingObserver {
 
               const SizedBox(height: 30),
 
-              // BOTÓN
               if (!_hasCheckedLider)
                 const CircularProgressIndicator(color: Colors.white)
               else
@@ -157,7 +156,7 @@ class _StartScreenState extends State<StartScreen> with WidgetsBindingObserver {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD84315),
+                    backgroundColor: const Color(0xFFFFC107),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
                       vertical: 15,
