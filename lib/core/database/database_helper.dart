@@ -30,6 +30,12 @@ class DatabaseHelper {
         aldea TEXT NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE descubiertos (
+        id INTEGER PRIMARY KEY
+      )
+    ''');
   }
 
   Future<int> crearNuevoLider(String nombre, String aldea) async {
@@ -46,5 +52,18 @@ class DatabaseHelper {
       return result.first;
     }
     return null;
+  }
+
+  Future<List<int>> getDescubiertos() async {
+    final db = await instance.database;
+    final res = await db.query('descubiertos');
+    return res.map((row) => row['id'] as int).toList();
+  }
+
+  Future<void> descubrirElemento(int id) async {
+    final db = await instance.database;
+    await db.insert('descubiertos', {
+      'id': id,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 }

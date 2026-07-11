@@ -67,6 +67,7 @@ flutter:
     - assets/images/sprites/
     - assets/audio/
     - assets/data/cuentos_nivel1.json
+    - assets/data/catalogo_flora_fauna_agua.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

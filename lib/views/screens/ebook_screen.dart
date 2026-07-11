@@ -1,13 +1,19 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../layouts/base_layout.dart';
+import 'package:flutter/services.dart';
+import 'package:semillas_app/views/layouts/base_layout.dart';
+import 'package:semillas_app/core/database/database_helper.dart';
 
 class EbookItem {
+  final int id;
   final String name;
   final String imagePath;
   final String type;
-  final bool descubierto;
+  bool descubierto;
 
-  const EbookItem({
+  EbookItem({
+    required this.id,
     required this.name,
     required this.imagePath,
     required this.type,
@@ -27,10 +33,85 @@ class _EbookScreenState extends State<EbookScreen> {
   int _currentPage = 0;
   final int _totalPages = 3;
 
+  List<EbookItem> todasLasPlantas = [];
+  List<EbookItem> todosLosAnimales = [];
+  List<EbookItem> todasLasAguas = [];
+  bool _isLoading = true;
+
+  static final List<int> _idsDescubiertosEnWeb = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatos();
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _cargarDatos() async {
+    try {
+      final String response = await rootBundle.loadString(
+        'assets/data/catalogo_flora_fauna_agua.json',
+      );
+      final List<dynamic> data = json.decode(response);
+
+      List<int> idsDescubiertos = [];
+
+      if (kIsWeb) {
+        idsDescubiertos = _idsDescubiertosEnWeb;
+      } else {
+        idsDescubiertos = await DatabaseHelper.instance.getDescubiertos();
+      }
+
+      List<EbookItem> plantas = [];
+      List<EbookItem> animales = [];
+      List<EbookItem> aguas = [];
+
+      for (var item in data) {
+        final int id = item['id'];
+        final bool estaDescubierto = idsDescubiertos.contains(id);
+
+        final ebookItem = EbookItem(
+          id: id,
+          name: item['name'],
+          imagePath: item['imagePath'],
+          type: item['type'],
+          descubierto: estaDescubierto,
+        );
+
+        if (ebookItem.type == 'planta') {
+          plantas.add(ebookItem);
+        } else if (ebookItem.type == 'animal') {
+          animales.add(ebookItem);
+        } else if (ebookItem.type == 'agua') {
+          aguas.add(ebookItem);
+        }
+      }
+
+      setState(() {
+        todasLasPlantas = plantas;
+        todosLosAnimales = animales;
+        todasLasAguas = aguas;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("Error cargando el catálogo o la BD: $e");
+    }
+  }
+
+  Future<void> _simularDescubrimiento(EbookItem item) async {
+    if (kIsWeb) {
+      if (!_idsDescubiertosEnWeb.contains(item.id)) {
+        _idsDescubiertosEnWeb.add(item.id);
+      }
+    } else {
+      await DatabaseHelper.instance.descubrirElemento(item.id);
+    }
+    _cargarDatos();
   }
 
   void _anteriorPagina() {
@@ -53,45 +134,6 @@ class _EbookScreenState extends State<EbookScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<EbookItem> todasLasPlantas = [
-      const EbookItem(
-        name: 'Moriche Palm',
-        imagePath: 'assets/images/moriche.png',
-        type: 'planta',
-        descubierto: true,
-      ),
-      const EbookItem(
-        name: 'Victoria Amazónica',
-        imagePath: 'assets/images/victoria_amazonica.png',
-        type: 'planta',
-        descubierto: true,
-      ),
-    ];
-
-    final List<EbookItem> todosLosAnimales = [
-      const EbookItem(
-        name: 'Guacamaya',
-        imagePath: 'assets/images/guacamaya.png',
-        type: 'animal',
-        descubierto: true,
-      ),
-      const EbookItem(
-        name: 'Danta',
-        imagePath: 'assets/images/danta.png',
-        type: 'animal',
-        descubierto: false,
-      ),
-    ];
-
-    final List<EbookItem> todasLasAguas = [
-      const EbookItem(
-        name: 'Agua Dulce',
-        imagePath: 'assets/images/Home_bg.webp',
-        type: 'agua',
-        descubierto: true,
-      ),
-    ];
-
     return BaseLayout(
       backgroundPath: 'assets/images/Conuco_bg.webp',
       child: Center(
@@ -111,71 +153,78 @@ class _EbookScreenState extends State<EbookScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black,
+                      color: Colors.black.withOpacity(0.4),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
                   ],
                   border: Border.all(color: const Color(0xFF4E342E), width: 6),
                 ),
-                child: Stack(
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 2,
-                        color: const Color(0xFF8D6E63),
-                      ),
-                    ),
-                    PageView(
-                      controller: _pageController,
-                      onPageChanged: (int page) {
-                        setState(() {
-                          _currentPage = page;
-                        });
-                      },
-                      children: [
-                        Row(
+                child:
+                    _isLoading
+                        ? const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF388E3C),
+                          ),
+                        )
+                        : Stack(
                           children: [
-                            Expanded(
-                              child: _buildHalfPage(
-                                titulo: "Nuestra Flora",
-                                items: todasLasPlantas,
+                            Center(
+                              child: Container(
+                                width: 2,
+                                color: const Color(0xFF8D6E63).withOpacity(0.4),
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(child: Container()),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildHalfPage(
-                                titulo: "Nuestra Fauna",
-                                items: todosLosAnimales,
-                              ),
+                            PageView(
+                              controller: _pageController,
+                              onPageChanged: (int page) {
+                                setState(() {
+                                  _currentPage = page;
+                                });
+                              },
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildHalfPage(
+                                        titulo: "Nuestra Flora",
+                                        items: todasLasPlantas,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(child: Container()),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildHalfPage(
+                                        titulo: "Nuestra Fauna",
+                                        items: todosLosAnimales,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(child: Container()),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildHalfPage(
+                                        titulo: "Nuestra Agua",
+                                        items: todasLasAguas,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(child: Container()),
+                                  ],
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(child: Container()),
                           ],
                         ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildHalfPage(
-                                titulo: "Nuestra Agua",
-                                items: todasLasAguas,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(child: Container()),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
               ),
-              if (_currentPage > 0)
+              if (!_isLoading && _currentPage > 0)
                 Positioned(
                   left: 4,
                   child: CircleAvatar(
@@ -190,7 +239,7 @@ class _EbookScreenState extends State<EbookScreen> {
                     ),
                   ),
                 ),
-              if (_currentPage < _totalPages - 1)
+              if (!_isLoading && _currentPage < _totalPages - 1)
                 Positioned(
                   right: 4,
                   child: CircleAvatar(
@@ -253,6 +302,8 @@ class _EbookScreenState extends State<EbookScreen> {
                 onTap: () {
                   if (item.descubierto) {
                     _mostrarPopupInformativo(context, item);
+                  } else {
+                    _simularDescubrimiento(item);
                   }
                 },
                 child: Column(
@@ -316,7 +367,7 @@ class _EbookScreenState extends State<EbookScreen> {
                         fontWeight: FontWeight.bold,
                         color:
                             item.descubierto
-                                ? Colors.brown.shade900
+                                ? const Color(0xFF3E2723)
                                 : Colors.black45,
                       ),
                     ),
