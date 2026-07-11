@@ -32,6 +32,10 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
+      CREATE TABLE cuentos_leidos (
+        id_cuento INTEGER,
+        nivel INTEGER,
+        PRIMARY KEY (id_cuento, nivel)
       CREATE TABLE descubiertos (
         id INTEGER PRIMARY KEY
       )
@@ -54,6 +58,28 @@ class DatabaseHelper {
     return null;
   }
 
+  Future<int> guardarCuentoLeido(int idCuento, int nivel) async {
+    final db = await database;
+    return await db.insert(
+      'cuentos_leidos',
+      {
+        'id_cuento': idCuento,
+        'nivel': nivel,
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+  }
+
+  Future<List<int>> obtenerCuentosLeidosPorNivel(int nivel) async {
+    final db = await database;
+    // Filtramos directamente por el nivel en el que se encuentra el jugador
+    final List<Map<String, dynamic>> maps = await db.query(
+      'cuentos_leidos',
+      where: 'nivel = ?',
+      whereArgs: [nivel],
+    );
+    
+    return List.generate(maps.length, (i) => maps[i]['id_cuento'] as int);
   Future<List<int>> getDescubiertos() async {
     final db = await instance.database;
     final res = await db.query('descubiertos');
